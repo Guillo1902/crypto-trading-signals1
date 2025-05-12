@@ -1,17 +1,19 @@
-import streamlit as st
+import os
+import json
 import firebase_admin
 from firebase_admin import credentials, db
-import datetime
-import pandas as pd
 
-# Configurar credenciales desde st.secrets
-cred_dict = dict(st.secrets["FIREBASE"])
-cred = credentials.Certificate(cred_dict)
+# Leer las credenciales del entorno Streamlit Secrets
+firebase_config = st.secrets["FIREBASE"]
 
-# Inicializar Firebase
+# Parsear la clave privada correctamente (importante para mantener saltos de línea)
+firebase_config["private_key"] = firebase_config["private_key"].replace("\\n", "\n")
+
+# Inicializar Firebase (una sola vez)
 if not firebase_admin._apps:
+    cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred, {
-        'databaseURL': "https://grupo10-b7d3b-default-rtdb.firebaseio.com/"
+        "databaseURL": "https://grupo10-b7d3b-default-rtdb.firebaseio.com/"
     })
 
 # Función para analizar historial de una criptomoneda
