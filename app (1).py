@@ -1,19 +1,18 @@
-import os
-import json
+import streamlit as st
+import pandas as pd
+import datetime
 import firebase_admin
 from firebase_admin import credentials, db
 
-# Leer las credenciales del entorno Streamlit Secrets
-firebase_config = st.secrets["FIREBASE"]
+# Cargar y corregir el diccionario de credenciales desde secrets.toml
+cred_dict = dict(st.secrets["FIREBASE"])
+cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
 
-# Parsear la clave privada correctamente (importante para mantener saltos de línea)
-firebase_config["private_key"] = firebase_config["private_key"].replace("\\n", "\n")
-
-# Inicializar Firebase (una sola vez)
+# Inicializar Firebase
 if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_config)
+    cred = credentials.Certificate(cred_dict)
     firebase_admin.initialize_app(cred, {
-        "databaseURL": "https://grupo10-b7d3b-default-rtdb.firebaseio.com/"
+        'databaseURL': 'https://grupo10-b7d3b-default-rtdb.firebaseio.com/'
     })
 
 # Función para analizar historial de una criptomoneda
@@ -67,6 +66,7 @@ st.set_page_config(page_title="Crypto Trading Signals", layout="wide")
 st.title("📊 Señales de Trading en Tiempo Real")
 st.write("Análisis de criptomonedas con datos en vivo desde Firebase.")
 
+# Visualización
 resultados = []
 for moneda in cryptos:
     r = analizar_historial(moneda)
@@ -78,3 +78,4 @@ if resultados:
     st.dataframe(df_resultados, use_container_width=True)
 else:
     st.warning("No se pudo recuperar información desde Firebase.")
+
